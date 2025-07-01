@@ -1,13 +1,22 @@
+// Importa el decorador Component para definir un componente Angular
 import { Component } from '@angular/core';
+// Importa RouterOutlet para la navegación entre páginas
 import { RouterOutlet } from '@angular/router';
 
+/**
+ * Componente principal de la aplicación El Pensum.
+ * Renderiza la estructura base y el router outlet para las páginas.
+ */
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  selector: 'app-root', // Nombre de la etiqueta personalizada
+  standalone: true, // Permite usar el componente sin módulo
+  imports: [RouterOutlet], // Habilita navegación entre rutas
+  templateUrl: './app.component.html', // Plantilla HTML principal
+  styleUrl: './app.component.css' // Estilos del componente
 })
 export class AppComponent {
+  /**
+   * Título de la aplicación, visible en la plantilla si se usa.
+   */
   title = 'el-pensum';
 }

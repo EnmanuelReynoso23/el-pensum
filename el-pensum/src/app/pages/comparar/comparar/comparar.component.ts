@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { CarreraUniversitariaService } from '../../../core/services/carrera-universitaria.service';
 import { UniversidadService } from '../../../core/services/universidad.service';
 import { CarreraUniversitaria } from '../../../core/models/carrera-universitaria.model';
-
+// Página de comparación de universidades y carreras
 @Component({
   selector: 'app-comparar',
   templateUrl: './comparar.component.html',
@@ -23,7 +23,7 @@ export class CompararComponent implements OnInit {
   campos = [
     { label: 'Duración (años)', key: 'duracionAnios' },
     { label: 'Costo Inscripción', key: 'costoInscripcion' },
-    { label: 'Costo Admisión', key: 'costoAdmision' },
+    { label: 'Costo Admision', key: 'costoAdmision' },
     { label: 'Costo Crédito', key: 'costoCredito' },
     { label: 'Total Créditos', key: 'totalCreditos' },
     { label: 'Costo Carnet', key: 'costoCarnet' },
@@ -37,6 +37,7 @@ export class CompararComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Obtiene los parámetros de la URL y realiza la comparación
     const slug1 = this.route.snapshot.paramMap.get('slug1');
     const slug2 = this.route.snapshot.paramMap.get('slug2');
     const slugCarrera = this.route.snapshot.paramMap.get('slugCarrera');
@@ -54,6 +55,7 @@ export class CompararComponent implements OnInit {
   }
 
   private obtenerIdsYComparar(): void {
+    // Busca los IDs y compara las carreras
     this.universidadService.getUniversidadIdPorNombre(this.universidad1Nombre).subscribe({
       next: id1 => {
         this.universidadService.getUniversidadIdPorNombre(this.universidad2Nombre).subscribe({
@@ -71,10 +73,12 @@ export class CompararComponent implements OnInit {
   }
 
   deslugify(slug: string): string {
+    // Convierte slug a texto normal
     return slug.replace(/-/g, ' ');
   }
 
   obtenerValor(cu: CarreraUniversitaria, campo: string): any {
+    // Obtiene el valor de un campo de la comparación
     const valor = (cu as any)[campo];
     return valor ?? 'N/D';
   }
@@ -82,6 +86,6 @@ export class CompararComponent implements OnInit {
 
 
 
-
+ 
 
 

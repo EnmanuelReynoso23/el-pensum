@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CarreraService } from '../../../core/services/carrera.service';
 import { Carrera } from '../../../core/models/carrera.model';
 
+// Admin: gestionar carreras universitarias
 @Component({
   selector: 'app-gestionar-carreras',
   standalone: true,
@@ -21,10 +22,12 @@ export class GestionarCarrerasComponent implements OnInit {
   constructor(private carreraService: CarreraService) {}
 
   ngOnInit(): void {
+    // Carga carreras al iniciar
     this.cargarCarreras();
   }
 
   cargarCarreras(): void {
+    // Obtiene todas las carreras
     this.cargando = true;
     this.carreraService.getCarreras().subscribe({
       next: (data) => {
@@ -40,6 +43,7 @@ export class GestionarCarrerasComponent implements OnInit {
   }
 
   guardar(): void {
+    // Crea o actualiza una carrera
     if (!this.carreraActual.nombre.trim()) {
       alert('El nombre de la carrera es obligatorio.');
       return;
@@ -73,6 +77,7 @@ export class GestionarCarrerasComponent implements OnInit {
   }
 
   editar(carrera: Carrera): void {
+    // Edita una carrera
     this.carreraActual = { ...carrera };
     this.modoEdicion = true;
   }

@@ -7,6 +7,7 @@ import { CarreraUniversitaria } from '../../../core/models/carrera-universitaria
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+// Admin: lista y gestiona universidades
 @Component({
   selector: 'app-listar-universidades',
   standalone: true,
@@ -28,6 +29,7 @@ export class ListarUniversidadesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Carga universidades al iniciar
     this.universidadService.getUniversidades().subscribe({
       next: (data) => {
         this.universidades = data;
@@ -42,6 +44,7 @@ export class ListarUniversidadesComponent implements OnInit {
   }
 
   eliminar(id: number): void {
+    // Elimina una universidad
     const confirmado = confirm('¿Estás seguro de que deseas eliminar esta universidad?');
     if (!confirmado) return;
 
@@ -58,14 +61,17 @@ export class ListarUniversidadesComponent implements OnInit {
   }
 
   editar(id: number): void {
+    // Navega a la edición de universidad
     this.router.navigate(['/admin/editar-universidad', id]);
   }
 
   crearUniversidad(): void {
+    // Navega a la creación de universidad
     this.router.navigate(['/admin/crear-universidad']);
   }
 
   toggleCarreras(idUniversidad: number): void {
+    // Muestra/oculta carreras de una universidad
     if (this.mostrarCarreras[idUniversidad]) {
       this.mostrarCarreras[idUniversidad] = false;
       return;
@@ -88,6 +94,7 @@ export class ListarUniversidadesComponent implements OnInit {
   }
 
   eliminarAsignacion(idUniversidad: number, idAsignacion: number): void {
+    // Elimina una carrera asignada a una universidad
     const confirmado = confirm('¿Eliminar esta carrera de la universidad?');
     if (!confirmado) return;
 
@@ -104,6 +111,7 @@ export class ListarUniversidadesComponent implements OnInit {
   }
 
   getCarreras(idUniversidad: number): CarreraUniversitaria[] {
+    // Devuelve las carreras de una universidad
     return this.carrerasPorUniversidad[idUniversidad] || [];
   }
 }

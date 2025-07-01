@@ -2,6 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+// Layout principal del panel de administración
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
@@ -15,21 +16,25 @@ export class AdminLayoutComponent {
 
   @HostListener('window:resize', [])
   onResize(): void {
+    // Ajusta el sidebar según el tamaño de pantalla
     this.esPantallaMovil = this.isMobile();
     this.sidebarAbierto = !this.esPantallaMovil;
   }
 
   toggleSidebar(): void {
+    // Abre/cierra el sidebar
     this.sidebarAbierto = !this.sidebarAbierto;
   }
 
   cerrarSidebar(): void {
+    // Cierra el sidebar en móvil
     if (this.esPantallaMovil) {
       this.sidebarAbierto = false;
     }
   }
 
   isMobile(): boolean {
+    // Detecta si es pantalla móvil
     return window.innerWidth < 768;
   }
 }

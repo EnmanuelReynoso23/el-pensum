@@ -36,7 +36,7 @@ dotnet run
 Frontend (Angular)
 
 cd el-pensum
-npm install
+npm install --force (Force por si tienen problemas de compatibilidad)
 ng serve
 
 

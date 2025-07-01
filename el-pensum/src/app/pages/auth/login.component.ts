@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
+// Login de usuario
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -18,6 +19,7 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  // Inicia sesión
   login(): void {
     this.error = '';
     this.authService.login(this.username, this.password).subscribe({

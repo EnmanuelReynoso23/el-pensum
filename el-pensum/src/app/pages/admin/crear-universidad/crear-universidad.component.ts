@@ -5,6 +5,7 @@ import { Universidad } from '../../../core/models/universidad.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// Admin: crear o editar universidad
 @Component({
   selector: 'app-crear-universidad',
   standalone: true,
@@ -34,12 +35,12 @@ export class CrearUniversidadComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Si hay id, es edición; si no, es creación
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
       if (idParam) {
         this.id = +idParam;
         this.modoEdicion = true;
-
         this.universidadService.getUniversidad(this.id).subscribe({
           next: (data: Universidad) => {
             this.universidad = data;
@@ -53,6 +54,7 @@ export class CrearUniversidadComponent implements OnInit {
   }
 
   guardar(): void {
+    // Guarda o actualiza universidad
     if (this.modoEdicion && this.id !== null) {
       this.universidadService.actualizarUniversidad(this.id, this.universidad).subscribe({
         next: () => {
@@ -77,14 +79,17 @@ export class CrearUniversidadComponent implements OnInit {
   }
 
   agregarImagen(): void {
+    // Agrega campo de imagen
     this.universidad.imagenesCampus.push('');
   }
 
   eliminarImagen(index: number): void {
+    // Elimina imagen
     this.universidad.imagenesCampus.splice(index, 1);
   }
 
   cancelar(): void {
+    // Cancela y vuelve al listado
     this.router.navigate(['/admin/universidades']);
   }
 }
