@@ -1,0 +1,19 @@
+/* Estilos adicionales para el navbar */
+nav {
+  backdrop-filter: blur(10px);
+}
+
+.router-link-active {
+  position: relative;
+}
+
+.router-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, #2563eb, #7c3aed);
+  border-radius: 1px;
+}

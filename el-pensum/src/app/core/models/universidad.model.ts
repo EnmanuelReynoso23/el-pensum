@@ -1,3 +1,5 @@
+import { CarreraUniversitaria } from './carrera-universitaria.model';
+
 export interface Universidad {
   id?: number;
   nombre: string;
@@ -7,4 +9,5 @@ export interface Universidad {
   rankingMundial: number;
   logoUrl: string;
   imagenesCampus: string[];
+  carreras?: CarreraUniversitaria[];
 }

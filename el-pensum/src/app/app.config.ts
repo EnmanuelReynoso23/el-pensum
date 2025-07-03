@@ -4,8 +4,7 @@ import { provideHttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideClientHydration } from '@angular/platform-browser';
 
 import { routes } from './app.routes';
-import { TokenInterceptor } from './core/interceptors/token.interceptor';
-import { provideQuillConfig } from 'ngx-quill'; 
+import { TokenInterceptor } from './core/interceptors/token.interceptor'; 
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,8 +16,7 @@ export const appConfig: ApplicationConfig = {
       useClass: TokenInterceptor,
       multi: true
     },
-    provideClientHydration(),
-    provideQuillConfig({}) 
+    provideClientHydration()
   ]
 };
 

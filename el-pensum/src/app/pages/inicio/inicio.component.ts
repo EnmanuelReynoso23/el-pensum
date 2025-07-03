@@ -9,4 +9,26 @@ import { FormularioCompararComponent } from '../comparar/formulario-comparar/for
   standalone: true,
   imports: [FormularioCompararComponent]
 })
-export class InicioComponent {}
+export class InicioComponent {
+  
+  scrollToComparar() {
+    const element = document.getElementById('comparar');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  scrollToFeatures() {
+    const element = document.getElementById('features');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  scrollToServicios() {
+    const element = document.getElementById('servicios');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+}

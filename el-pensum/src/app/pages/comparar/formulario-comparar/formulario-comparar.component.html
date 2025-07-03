@@ -1,36 +1,73 @@
-<div class="formulario-comparar">
-  <h2 class="text-xl font-semibold mb-4">Comparar universidades por carrera</h2>
+<div class="formulario-comparar max-w-4xl mx-auto">
+  <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+    <div class="text-center mb-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Comparar Universidades por Carrera</h2>
+      <p class="text-gray-600">Selecciona una carrera y dos universidades para ver una comparación detallada</p>
+    </div>
 
-  <!-- Selección de Carrera -->
-  <div class="mb-4">
-    <label class="block font-medium mb-1">Carrera:</label>
-    <select [(ngModel)]="carrera" (change)="onCarreraSeleccionada()" name="carrera" class="w-full border p-2 rounded">
-      <option [ngValue]="null">-- Selecciona una carrera --</option>
-      <option *ngFor="let c of carreras" [ngValue]="c">{{ c.nombre }}</option>
-    </select>
+    <div class="grid md:grid-cols-1 gap-6">
+      <!-- Selección de Carrera -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <svg class="w-5 h-5 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          Carrera:
+        </label>
+        <select [(ngModel)]="carrera" (change)="onCarreraSeleccionada()" name="carrera" 
+                class="w-full border-2 border-gray-300 p-4 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-gray-700 bg-gray-50 hover:bg-white">
+          <option [ngValue]="null">-- Selecciona una carrera --</option>
+          <option *ngFor="let c of carreras" [ngValue]="c">{{ c.nombre }}</option>
+        </select>
+      </div>
+
+      <!-- Contenedor de las dos universidades -->
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="carrera">
+        <!-- Selección de Universidad 1 -->
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <svg class="w-5 h-5 inline mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            Universidad 1:
+          </label>
+          <select [(ngModel)]="universidad1" name="universidad1" 
+                  class="w-full border-2 border-gray-300 p-4 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 text-gray-700 bg-gray-50 hover:bg-white"
+                  [disabled]="!universidadesFiltradas.length">
+            <option [ngValue]="null">-- Selecciona universidad 1 --</option>
+            <option *ngFor="let u of universidadesFiltradas" [ngValue]="u">{{ u.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- Selección de Universidad 2 -->
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <svg class="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            Universidad 2:
+          </label>
+          <select [(ngModel)]="universidad2" name="universidad2" 
+                  class="w-full border-2 border-gray-300 p-4 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 text-gray-700 bg-gray-50 hover:bg-white"
+                  [disabled]="!universidadesFiltradas.length">
+            <option [ngValue]="null">-- Selecciona universidad 2 --</option>
+            <option *ngFor="let u of universidadesFiltradas" [ngValue]="u">{{ u.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Botón de comparar -->
+      <div class="text-center mt-8" *ngIf="carrera">
+        <button (click)="comparar()" 
+                class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                [disabled]="!universidad1 || !universidad2 || !carrera">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Comparar Universidades
+        </button>
+      </div>
+    </div>
   </div>
-
-  <!-- Selección de Universidad 1 -->
-  <div class="mb-4">
-    <label class="block font-medium mb-1">Universidad 1:</label>
-    <select [(ngModel)]="universidad1" name="universidad1" class="w-full border p-2 rounded" [disabled]="!universidadesFiltradas.length">
-      <option [ngValue]="null">-- Selecciona universidad 1 --</option>
-      <option *ngFor="let u of universidadesFiltradas" [ngValue]="u">{{ u.nombre }}</option>
-    </select>
-  </div>
-
-  <!-- Selección de Universidad 2 -->
-  <div class="mb-4">
-    <label class="block font-medium mb-1">Universidad 2:</label>
-    <select [(ngModel)]="universidad2" name="universidad2" class="w-full border p-2 rounded" [disabled]="!universidadesFiltradas.length">
-      <option [ngValue]="null">-- Selecciona universidad 2 --</option>
-      <option *ngFor="let u of universidadesFiltradas" [ngValue]="u">{{ u.nombre }}</option>
-    </select>
-  </div>
-
-  <button (click)="comparar()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          [disabled]="!universidad1 || !universidad2 || !carrera">
-    Comparar
-  </button>
 </div>
 

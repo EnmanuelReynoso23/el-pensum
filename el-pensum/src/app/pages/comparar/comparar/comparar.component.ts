@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { CarreraUniversitariaService } from '../../../core/services/carrera-universitaria.service';
@@ -33,7 +33,8 @@ export class CompararComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private cuService: CarreraUniversitariaService,
-    private universidadService: UniversidadService
+    private universidadService: UniversidadService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -81,6 +82,87 @@ export class CompararComponent implements OnInit {
     // Obtiene el valor de un campo de la comparación
     const valor = (cu as any)[campo];
     return valor ?? 'N/D';
+  }
+
+  formatValue(value: any, key: string): string {
+    // Formatea los valores para mostrar
+    if (value === 'N/D' || value === null || value === undefined) {
+      return 'No disponible';
+    }
+    
+    if (key.includes('costo') || key.includes('Costo')) {
+      return `$${Number(value).toLocaleString()}`;
+    }
+    
+    if (key === 'duracionAnios') {
+      return `${value} años`;
+    }
+    
+    if (key === 'pensumPdf') {
+      return value ? 'Disponible' : 'No disponible';
+    }
+    
+    return value.toString();
+  }
+
+  getValueClass(value1: any, value2: any, key: string): string {
+    // Determina las clases CSS basadas en la comparación de valores
+    if (value1 === 'N/D' || value1 === null || value1 === undefined) {
+      return 'bg-gray-100 text-gray-600';
+    }
+
+    // Para costos, menor es mejor
+    if (key.includes('costo') || key.includes('Costo')) {
+      if (value2 === 'N/D' || value2 === null || value2 === undefined) {
+        return 'bg-blue-100 text-blue-800';
+      }
+      
+      const num1 = Number(value1);
+      const num2 = Number(value2);
+      
+      if (num1 < num2) {
+        return 'bg-green-100 text-green-800'; // Mejor (menor costo)
+      } else if (num1 > num2) {
+        return 'bg-red-100 text-red-800'; // Peor (mayor costo)
+      } else {
+        return 'bg-yellow-100 text-yellow-800'; // Igual
+      }
+    }
+
+    // Para duración, depende de la preferencia del usuario
+    if (key === 'duracionAnios') {
+      return 'bg-blue-100 text-blue-800';
+    }
+
+    // Para créditos, más puede ser mejor o peor dependiendo del contexto
+    if (key === 'totalCreditos') {
+      return 'bg-purple-100 text-purple-800';
+    }
+
+    // Default
+    return 'bg-gray-100 text-gray-800';
+  }
+
+  calcularCostoTotal(cu: CarreraUniversitaria): string {
+    // Calcula el costo total estimado
+    const inscripcion = Number(cu.costoInscripcion || 0);
+    const admision = Number(cu.costoAdmision || 0);
+    const credito = Number(cu.costoCredito || 0);
+    const totalCreditos = Number(cu.totalCreditos || 0);
+    const carnet = Number(cu.costoCarnet || 0);
+
+    const total = inscripcion + admision + (credito * totalCreditos) + carnet;
+    
+    if (total === 0) {
+      return 'No disponible';
+    }
+    
+    return `$${total.toLocaleString()}`;
+  }
+
+  nuevaComparacion(): void {
+    // Navega de vuelta al formulario para una nueva comparación
+    this.router.navigate(['/comparar']);
   }
 }
 

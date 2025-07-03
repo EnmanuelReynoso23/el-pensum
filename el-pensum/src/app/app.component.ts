@@ -2,6 +2,10 @@
 import { Component } from '@angular/core';
 // Importa RouterOutlet para la navegación entre páginas
 import { RouterOutlet } from '@angular/router';
+// Importa el componente de navegación
+import { NavbarComponent } from './shared/navbar/navbar.component';
+// Importa el componente de footer
+import { FooterComponent } from './shared/footer/footer.component';
 
 /**
  * Componente principal de la aplicación El Pensum.
@@ -10,7 +14,7 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root', // Nombre de la etiqueta personalizada
   standalone: true, // Permite usar el componente sin módulo
-  imports: [RouterOutlet], // Habilita navegación entre rutas
+  imports: [RouterOutlet, NavbarComponent, FooterComponent], // Habilita navegación entre rutas, navbar y footer
   templateUrl: './app.component.html', // Plantilla HTML principal
   styleUrl: './app.component.css' // Estilos del componente
 })
