@@ -1,69 +1,73 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Universidad } from '../models/universidad.model';
 import { CarreraUniversitaria } from '../models/carrera-universitaria.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UniversidadService {
-  private apiUrl = 'http://localhost:5265/api/universidades';
+  private readonly API_URL = `${environment.apiUrl}/universidades`;
 
   constructor(private http: HttpClient) {}
 
-  private obtenerHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
+  /**
+   * Obtiene todas las universidades
+   */
   getUniversidades(): Observable<Universidad[]> {
-    return this.http.get<Universidad[]>(this.apiUrl);
+    return this.http.get<Universidad[]>(this.API_URL);
   }
 
+  /**
+   * Obtiene una universidad específica por ID
+   */
   getUniversidad(id: number): Observable<Universidad> {
-    return this.http.get<Universidad>(`${this.apiUrl}/${id}`);
+    return this.http.get<Universidad>(`${this.API_URL}/${id}`);
   }
 
+  /**
+   * Obtiene las carreras asignadas a una universidad
+   */
   obtenerCarrerasAsignadas(idUniversidad: number): Observable<CarreraUniversitaria[]> {
-    return this.http.get<CarreraUniversitaria[]>(`${this.apiUrl}/${idUniversidad}/carreras`);
+    return this.http.get<CarreraUniversitaria[]>(`${this.API_URL}/${idUniversidad}/carreras`);
   }
 
+  /**
+   * Obtiene universidades que ofrecen una carrera específica
+   */
   getUniversidadesPorCarrera(idCarrera: number): Observable<Universidad[]> {
-    return this.http.get<Universidad[]>(`${this.apiUrl}/por-carrera/${idCarrera}`);
+    return this.http.get<Universidad[]>(`${this.API_URL}/por-carrera/${idCarrera}`);
   }
 
+  /**
+   * Crea una nueva universidad
+   */
   crearUniversidad(universidad: Universidad): Observable<Universidad> {
-    return this.http.post<Universidad>(this.apiUrl, universidad, {
-      headers: this.obtenerHeaders()
-    });
+    return this.http.post<Universidad>(this.API_URL, universidad);
   }
 
+  /**
+   * Actualiza una universidad existente
+   */
   actualizarUniversidad(id: number, universidad: Universidad): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, universidad, {
-      headers: this.obtenerHeaders()
-    });
+    return this.http.put<void>(`${this.API_URL}/${id}`, universidad);
   }
 
-  eliminarUniversidad(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: this.obtenerHeaders()
-    });
+  /**
+   * Elimina una universidad
+   */
+  eliminarUniversidad(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}`);
   }
 
-  // ✅ NUEVO MÉTODO AÑADIDO
+  /**
+   * Obtiene el ID de una universidad por su nombre
+   */
   getUniversidadIdPorNombre(nombre: string): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/id`, {
+    return this.http.get<number>(`${this.API_URL}/id`, {
       params: { nombre }
     });
   }
 }
-
-
-
-
-
-

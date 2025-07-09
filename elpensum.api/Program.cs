@@ -9,16 +9,16 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 
-//  ApplicationDbContext con la cadena de conexión
+// ApplicationDbContext con la cadena de conexión
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-// servicio de envío de correos
+// Servicio de envío de correos
 builder.Services.AddScoped<EmailService>();
 
 
-//  política de CORS para permitir Angular en desarrollo
+// Política de CORS para permitir Angular en desarrollo
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDevClient", policy =>
@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
 });
 
 
-//  Configurar autenticación JWT
+// Configurar autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -48,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 
-//  soporte para controladores 
+// Soporte para controladores
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
@@ -78,24 +78,24 @@ if (app.Environment.IsDevelopment())
 }
 
 
-//  archivos estáticos (wwwroot)
+// Archivos estáticos (wwwroot)
 app.UseStaticFiles();
 
 
-//  enrutamiento
+// Enrutamiento
 app.UseRouting();
 
 
-// política CORS definida arriba
+// Política CORS definida arriba
 app.UseCors("AllowAngularDevClient");
 
 
-// autenticación y autorización
+// Autenticación y autorización
 app.UseAuthentication();
 app.UseAuthorization();
 
 
-// Mapeao de los controladores
+// Mapeo de los controladores
 app.MapControllers();
 
 

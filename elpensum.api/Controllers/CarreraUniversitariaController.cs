@@ -97,6 +97,20 @@ namespace ElPensum.API.Controllers
             return Ok(cuExistente);
         }
 
+        // GET: api/carrerauniversitaria/universidad/{idUniversidad}
+        [HttpGet("universidad/{idUniversidad}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<CarreraUniversitaria>>> GetCarrerasPorUniversidad(int idUniversidad)
+        {
+            var carreras = await _context.CarrerasUniversitarias
+                .Include(cu => cu.Carrera)
+                .Include(cu => cu.Universidad)
+                .Where(cu => cu.UniversidadId == idUniversidad)
+                .ToListAsync();
+
+            return Ok(carreras);
+        }
+
         // DELETE: api/carrerauniversitaria/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Eliminar(int id)
@@ -112,6 +126,3 @@ namespace ElPensum.API.Controllers
         }
     }
 }
-
-
-

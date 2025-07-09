@@ -1,11 +1,47 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { CarreraUniversitariaService } from '../../../core/services/carrera-universitaria.service';
 import { UniversidadService } from '../../../core/services/universidad.service';
 import { CarreraUniversitaria } from '../../../core/models/carrera-universitaria.model';
-// Página de comparación de universidades y carreras
+
+/**
+ * Interfaz para los campos de comparación
+ */
+interface CampoComparacion {
+  label: string;
+  key: string;
+}
+
+/**
+ * Constantes para las clases CSS de comparación
+ */
+const CSS_CLASSES = {
+  UNAVAILABLE: 'bg-gray-100 text-gray-600',
+  BETTER: 'bg-green-100 text-green-800',
+  WORSE: 'bg-red-100 text-red-800',
+  EQUAL: 'bg-yellow-100 text-yellow-800',
+  NEUTRAL: 'bg-blue-100 text-blue-800',
+  DEFAULT: 'bg-gray-100 text-gray-800',
+  DURATION: 'bg-blue-100 text-blue-800',
+  CREDITS: 'bg-purple-100 text-purple-800'
+} as const;
+
+/**
+ * Constantes para valores predeterminados
+ */
+const DEFAULT_VALUES = {
+  UNAVAILABLE: 'N/D',
+  NO_AVAILABLE_TEXT: 'No disponible'
+} as const;
+
+/**
+ * Componente para comparar carreras universitarias entre dos universidades
+ * Permite visualizar diferencias en costos, duración y otros aspectos académicos
+ */
 @Component({
   selector: 'app-comparar',
   templateUrl: './comparar.component.html',
@@ -14,160 +50,257 @@ import { CarreraUniversitaria } from '../../../core/models/carrera-universitaria
   imports: [CommonModule]
 })
 export class CompararComponent implements OnInit {
+  // #region Properties
   carreraNombre = '';
   universidad1Nombre = '';
   universidad2Nombre = '';
-
   comparacion: CarreraUniversitaria[] = [];
 
-  campos = [
+  readonly camposComparacion: CampoComparacion[] = [
     { label: 'Duración (años)', key: 'duracionAnios' },
     { label: 'Costo Inscripción', key: 'costoInscripcion' },
-    { label: 'Costo Admision', key: 'costoAdmision' },
     { label: 'Costo Crédito', key: 'costoCredito' },
     { label: 'Total Créditos', key: 'totalCreditos' },
     { label: 'Costo Carnet', key: 'costoCarnet' },
     { label: 'Pensum PDF', key: 'pensumPdf' }
   ];
+  // #endregion
 
+  // #region Constructor
   constructor(
     private route: ActivatedRoute,
-    private cuService: CarreraUniversitariaService,
+    private carreraUniversitariaService: CarreraUniversitariaService,
     private universidadService: UniversidadService,
     private router: Router
   ) {}
+  // #endregion
 
+  // #region Lifecycle Hooks
   ngOnInit(): void {
-    // Obtiene los parámetros de la URL y realiza la comparación
-    const slug1 = this.route.snapshot.paramMap.get('slug1');
-    const slug2 = this.route.snapshot.paramMap.get('slug2');
-    const slugCarrera = this.route.snapshot.paramMap.get('slugCarrera');
+    this.inicializarComparacion();
+  }
+  // #endregion
 
-    if (!slug1 || !slug2 || !slugCarrera) {
-      console.error('❌ Faltan parámetros en la URL');
+  // #region Public Methods
+  /**
+   * Obtiene el valor de un campo específico para mostrar en la tabla
+   */
+  obtenerValor(carreraUniversitaria: CarreraUniversitaria, campo: string): any {
+    const valor = (carreraUniversitaria as any)[campo];
+    return valor ?? DEFAULT_VALUES.UNAVAILABLE;
+  }
+
+  /**
+   * Formatea un valor para su visualización según el tipo de campo
+   */
+  formatearValor(valor: any, tipoCampo: string): string {
+    if (this.esValorNoDisponible(valor)) {
+      return DEFAULT_VALUES.NO_AVAILABLE_TEXT;
+    }
+    
+    if (this.esCampoCosto(tipoCampo)) {
+      return this.formatearMoneda(valor);
+    }
+    
+    if (tipoCampo === 'duracionAnios') {
+      return this.formatearDuracion(valor);
+    }
+    
+    if (tipoCampo === 'pensumPdf') {
+      return this.formatearDisponibilidad(valor);
+    }
+    
+    return valor.toString();
+  }
+
+  /**
+   * Obtiene las clases CSS para mostrar visualmente la comparación entre valores
+   */
+  obtenerClasesComparacion(valor1: any, valor2: any, tipoCampo: string): string {
+    if (this.esValorNoDisponible(valor1)) {
+      return CSS_CLASSES.UNAVAILABLE;
+    }
+
+    if (this.esCampoCosto(tipoCampo)) {
+      return this.obtenerClasesComparacionCosto(valor1, valor2);
+    }
+
+    if (tipoCampo === 'duracionAnios') {
+      return CSS_CLASSES.DURATION;
+    }
+
+    if (tipoCampo === 'totalCreditos') {
+      return CSS_CLASSES.CREDITS;
+    }
+
+    return CSS_CLASSES.DEFAULT;
+  }
+
+  /**
+   * Calcula el costo total estimado de una carrera universitaria
+   */
+  calcularCostoTotal(carreraUniversitaria: CarreraUniversitaria): string {
+    const costoInscripcion = this.convertirANumero(carreraUniversitaria.costoInscripcion);
+    const costoCredito = this.convertirANumero(carreraUniversitaria.costoCredito);
+    const totalCreditos = this.convertirANumero(carreraUniversitaria.totalCreditos);
+    const costoCarnet = this.convertirANumero(carreraUniversitaria.costoCarnet);
+
+    const costoTotal = costoInscripcion + (costoCredito * totalCreditos) + costoCarnet;
+    
+    if (costoTotal === 0) {
+      return DEFAULT_VALUES.NO_AVAILABLE_TEXT;
+    }
+    
+    return this.formatearMoneda(costoTotal);
+  }
+
+  /**
+   * Navega de vuelta al formulario para iniciar una nueva comparación
+   */
+  iniciarNuevaComparacion(): void {
+    this.router.navigate(['/comparar']);
+  }
+  // #endregion
+
+  // #region Private Methods
+  /**
+   * Inicializa el proceso de comparación obteniendo parámetros de la URL
+   */
+  private inicializarComparacion(): void {
+    const parametrosUrl = this.obtenerParametrosUrl();
+    
+    if (!this.validarParametrosUrl(parametrosUrl)) {
+      console.error('❌ Faltan parámetros requeridos en la URL');
       return;
     }
 
-    this.universidad1Nombre = this.deslugify(slug1);
-    this.universidad2Nombre = this.deslugify(slug2);
-    this.carreraNombre = this.deslugify(slugCarrera);
-
-    this.obtenerIdsYComparar();
+    this.asignarNombresDesdeParametros(parametrosUrl);
+    this.ejecutarComparacion();
   }
 
-  private obtenerIdsYComparar(): void {
-    // Busca los IDs y compara las carreras
-    this.universidadService.getUniversidadIdPorNombre(this.universidad1Nombre).subscribe({
-      next: id1 => {
-        this.universidadService.getUniversidadIdPorNombre(this.universidad2Nombre).subscribe({
-          next: id2 => {
-            this.cuService.compararCarreras(id1, id2, this.carreraNombre).subscribe({
-              next: data => this.comparacion = data,
-              error: err => console.error('❌ Error al obtener comparación:', err)
-            });
-          },
-          error: err => console.error('❌ Error al obtener ID universidad 2:', err)
-        });
-      },
-      error: err => console.error('❌ Error al obtener ID universidad 1:', err)
-    });
+  /**
+   * Obtiene los parámetros de la URL
+   */
+  private obtenerParametrosUrl() {
+    return {
+      slug1: this.route.snapshot.paramMap.get('slug1'),
+      slug2: this.route.snapshot.paramMap.get('slug2'),
+      slugCarrera: this.route.snapshot.paramMap.get('slugCarrera')
+    };
   }
 
-  deslugify(slug: string): string {
-    // Convierte slug a texto normal
+  /**
+   * Valida que todos los parámetros requeridos estén presentes
+   */
+  private validarParametrosUrl(parametros: any): boolean {
+    return !!(parametros.slug1 && parametros.slug2 && parametros.slugCarrera);
+  }
+
+  /**
+   * Asigna los nombres convertidos desde los slugs de la URL
+   */
+  private asignarNombresDesdeParametros(parametros: any): void {
+    this.universidad1Nombre = this.convertirSlugATexto(parametros.slug1);
+    this.universidad2Nombre = this.convertirSlugATexto(parametros.slug2);
+    this.carreraNombre = this.convertirSlugATexto(parametros.slugCarrera);
+  }
+
+  /**
+   * Ejecuta la comparación obteniendo IDs de universidades y datos de comparación
+   */
+  private ejecutarComparacion(): void {
+    const universidad1$ = this.universidadService.getUniversidadIdPorNombre(this.universidad1Nombre);
+    const universidad2$ = this.universidadService.getUniversidadIdPorNombre(this.universidad2Nombre);
+
+    forkJoin([universidad1$, universidad2$])
+      .pipe(
+        switchMap(([id1, id2]) => 
+          this.carreraUniversitariaService.compararCarreras(id1, id2, this.carreraNombre)
+        )
+      )
+      .subscribe({
+        next: (datos) => this.comparacion = datos,
+        error: (error) => this.manejarErrorComparacion(error)
+      });
+  }
+
+  /**
+   * Maneja errores durante el proceso de comparación
+   */
+  private manejarErrorComparacion(error: any): void {
+    console.error('❌ Error al ejecutar la comparación:', error);
+    // Aquí se podría mostrar un mensaje al usuario usando un servicio de notificaciones
+  }
+
+  /**
+   * Convierte un slug de URL a texto legible
+   */
+  private convertirSlugATexto(slug: string): string {
     return slug.replace(/-/g, ' ');
   }
 
-  obtenerValor(cu: CarreraUniversitaria, campo: string): any {
-    // Obtiene el valor de un campo de la comparación
-    const valor = (cu as any)[campo];
-    return valor ?? 'N/D';
+  /**
+   * Verifica si un valor es considerado no disponible
+   */
+  private esValorNoDisponible(valor: any): boolean {
+    return valor === DEFAULT_VALUES.UNAVAILABLE || 
+           valor === null || 
+           valor === undefined;
   }
 
-  formatValue(value: any, key: string): string {
-    // Formatea los valores para mostrar
-    if (value === 'N/D' || value === null || value === undefined) {
-      return 'No disponible';
-    }
-    
-    if (key.includes('costo') || key.includes('Costo')) {
-      return `$${Number(value).toLocaleString()}`;
-    }
-    
-    if (key === 'duracionAnios') {
-      return `${value} años`;
-    }
-    
-    if (key === 'pensumPdf') {
-      return value ? 'Disponible' : 'No disponible';
-    }
-    
-    return value.toString();
+  /**
+   * Verifica si un campo es de tipo costo
+   */
+  private esCampoCosto(tipoCampo: string): boolean {
+    return tipoCampo.includes('costo') || tipoCampo.includes('Costo');
   }
 
-  getValueClass(value1: any, value2: any, key: string): string {
-    // Determina las clases CSS basadas en la comparación de valores
-    if (value1 === 'N/D' || value1 === null || value1 === undefined) {
-      return 'bg-gray-100 text-gray-600';
-    }
-
-    // Para costos, menor es mejor
-    if (key.includes('costo') || key.includes('Costo')) {
-      if (value2 === 'N/D' || value2 === null || value2 === undefined) {
-        return 'bg-blue-100 text-blue-800';
-      }
-      
-      const num1 = Number(value1);
-      const num2 = Number(value2);
-      
-      if (num1 < num2) {
-        return 'bg-green-100 text-green-800'; // Mejor (menor costo)
-      } else if (num1 > num2) {
-        return 'bg-red-100 text-red-800'; // Peor (mayor costo)
-      } else {
-        return 'bg-yellow-100 text-yellow-800'; // Igual
-      }
-    }
-
-    // Para duración, depende de la preferencia del usuario
-    if (key === 'duracionAnios') {
-      return 'bg-blue-100 text-blue-800';
-    }
-
-    // Para créditos, más puede ser mejor o peor dependiendo del contexto
-    if (key === 'totalCreditos') {
-      return 'bg-purple-100 text-purple-800';
-    }
-
-    // Default
-    return 'bg-gray-100 text-gray-800';
+  /**
+   * Formatea un valor numérico como moneda
+   */
+  private formatearMoneda(valor: number): string {
+    return `$${Number(valor).toLocaleString()}`;
   }
 
-  calcularCostoTotal(cu: CarreraUniversitaria): string {
-    // Calcula el costo total estimado
-    const inscripcion = Number(cu.costoInscripcion || 0);
-    const admision = Number(cu.costoAdmision || 0);
-    const credito = Number(cu.costoCredito || 0);
-    const totalCreditos = Number(cu.totalCreditos || 0);
-    const carnet = Number(cu.costoCarnet || 0);
+  /**
+   * Formatea la duración en años
+   */
+  private formatearDuracion(valor: number): string {
+    return `${valor} años`;
+  }
 
-    const total = inscripcion + admision + (credito * totalCreditos) + carnet;
-    
-    if (total === 0) {
-      return 'No disponible';
+  /**
+   * Formatea la disponibilidad de un recurso
+   */
+  private formatearDisponibilidad(valor: any): string {
+    return valor ? 'Disponible' : DEFAULT_VALUES.NO_AVAILABLE_TEXT;
+  }
+
+  /**
+   * Obtiene clases CSS específicas para comparación de costos
+   */
+  private obtenerClasesComparacionCosto(valor1: any, valor2: any): string {
+    if (this.esValorNoDisponible(valor2)) {
+      return CSS_CLASSES.NEUTRAL;
     }
     
-    return `$${total.toLocaleString()}`;
+    const numero1 = Number(valor1);
+    const numero2 = Number(valor2);
+    
+    if (numero1 < numero2) {
+      return CSS_CLASSES.BETTER; // Menor costo es mejor
+    } else if (numero1 > numero2) {
+      return CSS_CLASSES.WORSE; // Mayor costo es peor
+    } else {
+      return CSS_CLASSES.EQUAL; // Costos iguales
+    }
   }
 
-  nuevaComparacion(): void {
-    // Navega de vuelta al formulario para una nueva comparación
-    this.router.navigate(['/comparar']);
+  /**
+   * Convierte un valor a número, retornando 0 si no es válido
+   */
+  private convertirANumero(valor: any): number {
+    return Number(valor || 0);
   }
+  // #endregion
 }
-
-
-
- 
-
-

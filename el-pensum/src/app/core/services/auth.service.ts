@@ -1,45 +1,119 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+
+interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5265/api/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
+  private readonly TOKEN_KEY = 'auth_token';
+  
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasValidToken());
+  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient, 
+    private router: Router
+  ) {}
 
-  login(username: string, password: string): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, { username, password });
+  /**
+   * Realiza el login del usuario
+   */
+  login(username: string, password: string): Observable<LoginResponse> {
+    const loginData: LoginRequest = { username, password };
+    
+    return this.http.post<LoginResponse>(`${this.API_URL}/login`, loginData).pipe(
+      tap(response => {
+        this.saveToken(response.token);
+        this.isAuthenticatedSubject.next(true);
+      })
+    );
   }
 
-  guardarToken(token: string): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('token', token);
-    }
-  }
-
-  eliminarToken(): void {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-    }
-  }
-
-obtenerToken(): string | null {
-  return typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-}
-
-
-  estaAutenticado(): boolean {
-    return !!this.obtenerToken();
-  }
-
+  /**
+   * Cierra la sesión del usuario
+   */
   logout(): void {
-    this.eliminarToken();
+    this.removeToken();
+    this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/login']);
   }
+
+  /**
+   * Verifica si el usuario está autenticado
+   */
+  isAuthenticated(): boolean {
+    return this.hasValidToken();
+  }
+
+  /**
+   * Verifica si el usuario está autenticado (alias en español)
+   */
+  estaAutenticado(): boolean {
+    return this.hasValidToken();
+  }
+
+  /**
+   * Obtiene el token de autenticación
+   */
+  getToken(): string | null {
+    if (!this.isBrowser()) {
+      return null;
+    }
+    
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Guarda el token en localStorage
+   */
+  private saveToken(token: string): void {
+    if (this.isBrowser()) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    }
+  }
+
+  /**
+   * Guarda el token en localStorage (alias público en español)
+   */
+  guardarToken(token: string): void {
+    this.saveToken(token);
+  }
+
+  /**
+   * Elimina el token del localStorage
+   */
+  private removeToken(): void {
+    if (this.isBrowser()) {
+      localStorage.removeItem(this.TOKEN_KEY);
+    }
+  }
+
+  /**
+   * Verifica si hay un token válido
+   */
+  private hasValidToken(): boolean {
+    const token = this.getToken();
+    return !!token;
+  }
+
+  /**
+   * Verifica si estamos en el browser (SSR compatibility)
+   */
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+  }
 }
-
-

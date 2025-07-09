@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "angular": "^1.8.3"
+    "angular": "^1.8.3",
+    "fix": "^0.0.6"
   }
 }

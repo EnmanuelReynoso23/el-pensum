@@ -32,7 +32,7 @@ namespace ElPensum.API.Controllers
             if (usuario == null)
                 return Unauthorized("Usuario no encontrado");
 
-            // Validar password
+            // Validar contraseña
             using var sha256 = SHA256.Create();
             var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
             var hashString = Convert.ToBase64String(hash);
@@ -40,7 +40,7 @@ namespace ElPensum.API.Controllers
             if (usuario.PasswordHash != hashString)
                 return Unauthorized("Contraseña incorrecta");
 
-            // Tiempo de expiración 
+            // Tiempo de expiración
             int expireMinutes = int.TryParse(_config["Jwt:ExpireMinutes"], out var mins) ? mins : 60;
 
             // Generar token

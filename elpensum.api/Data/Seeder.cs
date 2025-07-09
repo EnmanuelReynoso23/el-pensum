@@ -123,7 +123,3 @@ namespace ElPensum.API.Data
         }
     }
 }
-
-
-
-

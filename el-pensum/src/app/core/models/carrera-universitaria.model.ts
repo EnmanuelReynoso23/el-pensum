@@ -7,11 +7,10 @@ export interface CarreraUniversitaria {
   universidad?: Universidad;
   carreraId: number;
   carrera?: Carrera;
-  duracionAnios: number;
-  costoInscripcion: number;
-  costoAdmision: number;
-  costoCredito: number;
-  totalCreditos: number;
-  costoCarnet: number;
+  duracionAnios: number; 
+  costoInscripcion: number; 
+  costoCredito: number; 
+  totalCreditos: number; 
+  costoCarnet: number; 
   pensumPdf?: string;
 }

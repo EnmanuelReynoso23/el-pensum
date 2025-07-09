@@ -64,7 +64,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let campo of campos; let i = index" 
+              <tr *ngFor="let campo of camposComparacion; let i = index" 
                   [class]="i % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
                   class="hover:bg-blue-50 transition-colors duration-200">
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -83,14 +83,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
                   <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                       [class]="getValueClass(obtenerValor(comparacion[0], campo.key), obtenerValor(comparacion[1], campo.key), campo.key)">
-                    {{ formatValue(obtenerValor(comparacion[0], campo.key), campo.key) }}
+                       [class]="obtenerClasesComparacion(obtenerValor(comparacion[0], campo.key), obtenerValor(comparacion[1], campo.key), campo.key)">
+                    {{ formatearValor(obtenerValor(comparacion[0], campo.key), campo.key) }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
                   <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                       [class]="getValueClass(obtenerValor(comparacion[1], campo.key), obtenerValor(comparacion[0], campo.key), campo.key)">
-                    {{ formatValue(obtenerValor(comparacion[1], campo.key), campo.key) }}
+                       [class]="obtenerClasesComparacion(obtenerValor(comparacion[1], campo.key), obtenerValor(comparacion[0], campo.key), campo.key)">
+                    {{ formatearValor(obtenerValor(comparacion[1], campo.key), campo.key) }}
                   </div>
                 </td>
               </tr>
@@ -153,7 +153,7 @@
             <button class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
               Solicitar Asesoría
             </button>
-            <button (click)="nuevaComparacion()" class="border-2 border-gray-400 text-gray-600 px-8 py-3 rounded-lg font-semibold hover:border-gray-600 hover:text-gray-800 transition-colors duration-300">
+            <button (click)="iniciarNuevaComparacion()" class="border-2 border-gray-400 text-gray-600 px-8 py-3 rounded-lg font-semibold hover:border-gray-600 hover:text-gray-800 transition-colors duration-300">
               Nueva Comparación
             </button>
           </div>
@@ -171,7 +171,7 @@
           </div>
           <h3 class="text-2xl font-bold text-gray-800 mb-4">Información No Disponible</h3>
           <p class="text-gray-600 mb-8">No hay información suficiente para comparar estas universidades en la carrera seleccionada.</p>
-          <button (click)="nuevaComparacion()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+          <button (click)="iniciarNuevaComparacion()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
             Intentar Nueva Comparación
           </button>
         </div>

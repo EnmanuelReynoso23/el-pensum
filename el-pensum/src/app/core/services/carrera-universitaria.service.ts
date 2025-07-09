@@ -3,12 +3,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CarreraUniversitaria } from '../models/carrera-universitaria.model';
 import { Universidad } from '../models/universidad.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CarreraUniversitariaService {
-  private apiUrl = 'http://localhost:5265/api/carrerauniversitaria';
+  private apiUrl = `${environment.apiUrl}/carrerauniversitaria`;
 
   constructor(private http: HttpClient) {}
 
@@ -64,5 +65,3 @@ export class CarreraUniversitariaService {
     });
   }
 }
-
-

@@ -1,0 +1,679 @@
+{
+	"info": {
+		"_postman_id": "el-pensum-api-collection",
+		"name": "El Pensum API",
+		"description": "Colección completa para probar todas las funcionalidades de la API El Pensum",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🔐 Autenticación",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('auth_token', response.token);",
+									"    pm.test('Login exitoso', function () {",
+									"        pm.response.to.have.status(200);",
+									"    });",
+									"} else {",
+									"    pm.test('Login falló', function () {",
+									"        pm.response.to.have.status(401);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏫 Universidades",
+			"item": [
+				{
+					"name": "Listar Universidades",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});",
+									"",
+									"if (pm.response.json().length > 0) {",
+									"    const firstUniv = pm.response.json()[0];",
+									"    pm.environment.set('universidad_id', firstUniv.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/universidades",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"universidades"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtener Universidad por ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Universidad tiene propiedades requeridas', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('nombre');",
+									"    pm.expect(response).to.have.property('pais');",
+									"    pm.expect(response).to.have.property('ciudad');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/universidades/{{universidad_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"universidades",
+								"{{universidad_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Carreras de Universidad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/universidades/{{universidad_id}}/carreras",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"universidades",
+								"{{universidad_id}}",
+								"carreras"
+							]
+						}
+					}
+				},
+				{
+					"name": "Crear Universidad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201 or 200', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('nueva_universidad_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Universidad de Prueba\",\n  \"pais\": \"República Dominicana\",\n  \"ciudad\": \"Santo Domingo\",\n  \"rankingNacional\": 10,\n  \"rankingMundial\": 500,\n  \"logoUrl\": \"https://ejemplo.com/logo.png\",\n  \"imagenesCampus\": [\"https://ejemplo.com/campus1.jpg\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/universidades",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"universidades"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📚 Carreras",
+			"item": [
+				{
+					"name": "Listar Carreras",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});",
+									"",
+									"if (pm.response.json().length > 0) {",
+									"    const firstCarrera = pm.response.json()[0];",
+									"    pm.environment.set('carrera_id', firstCarrera.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/carreras",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carreras"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtener Carrera por ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Carrera tiene propiedades requeridas', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('nombre');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/carreras/{{carrera_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carreras",
+								"{{carrera_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Crear Carrera",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('nueva_carrera_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Carrera de Prueba\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/carreras",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carreras"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔗 Carrera-Universidad",
+			"item": [
+				{
+					"name": "Universidades por Carrera",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/carrerauniversitaria/universidades-por-carrera/{{carrera_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carrerauniversitaria",
+								"universidades-por-carrera",
+								"{{carrera_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Carreras por Universidad (NUEVO ENDPOINT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Endpoint agregado funciona correctamente', function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/carrerauniversitaria/universidad/{{universidad_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carrerauniversitaria",
+								"universidad",
+								"{{universidad_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Comparar Carreras",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 404', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test('Response is array', function () {",
+									"        const response = pm.response.json();",
+									"        pm.expect(response).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/carrerauniversitaria/comparacion?uni1={{universidad_id}}&uni2={{universidad_id}}&carrera=Ingeniería",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carrerauniversitaria",
+								"comparacion"
+							],
+							"query": [
+								{
+									"key": "uni1",
+									"value": "{{universidad_id}}"
+								},
+								{
+									"key": "uni2",
+									"value": "{{universidad_id}}"
+								},
+								{
+									"key": "carrera",
+									"value": "Ingeniería"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Asignar Carrera a Universidad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('asignacion_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"universidadId\": {{universidad_id}},\n  \"carreraId\": {{carrera_id}},\n  \"duracionAnios\": 4.5,\n  \"costoInscripcion\": 50000,\n  \"costoAdmision\": 25000,\n  \"costoCredito\": 2500,\n  \"totalCreditos\": 180,\n  \"costoCarnet\": 1500,\n  \"pensumPdf\": \"https://ejemplo.com/pensum.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/carrerauniversitaria",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"carrerauniversitaria"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🎓 Asesorías",
+			"item": [
+				{
+					"name": "Crear Solicitud de Asesoría",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 or 201', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreCompleto\": \"Juan Pérez\",\n  \"correo\": \"juan.perez@ejemplo.com\",\n  \"carreraInteres\": \"Ingeniería de Sistemas\",\n  \"colegio\": \"Colegio San Juan\",\n  \"edad\": 18,\n  \"comentarios\": \"Me interesa conocer más sobre el programa de estudios\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/asesoria",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"asesoria"
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Asesorías",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is array', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/asesoria",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"asesoria"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5265",
+			"type": "string"
+		}
+	]
+}

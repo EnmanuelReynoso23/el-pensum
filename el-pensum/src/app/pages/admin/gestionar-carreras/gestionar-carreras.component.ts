@@ -44,7 +44,7 @@ export class GestionarCarrerasComponent implements OnInit {
 
   guardar(): void {
     // Crea o actualiza una carrera
-    if (!this.carreraActual.nombre.trim()) {
+    if (!this.carreraActual.nombre?.trim()) {
       alert('El nombre de la carrera es obligatorio.');
       return;
     }
